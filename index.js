@@ -1,7 +1,7 @@
 var Horseman = require('node-horseman');
 var json2csv = require('json2csv');
 var fs = require('fs');
-var horseman = new Horseman();
+var horseman = new Horseman({timeout: 10000});
 var fields = ["city", "partner name", "address", "latitude", "longitude", "average rating", "phone number"];
 var fileName = "kfit_partners.csv";
 var data = {
@@ -21,7 +21,7 @@ horseman
 .evaluate(function(){ return window.outlet_details})
 .then(function(details){
   data["city"] = formatCity(details.city);
-  data["partner name"] = details.name;
+  data["partner name"] = details.name.toUpperCase();
   data["address"] = details.address;
 })
 .evaluate(function(){
@@ -31,6 +31,7 @@ horseman
     t = $(scripts[i]).text();
     if(t.match(/outlet_details/)){
       match = $(scripts[i]).text().match(/google.maps.LatLng\('([0-9.]+)'\s*,\s*'([0-9.]+)'\)/);
+      break;
     }
   }
   return match;
@@ -44,8 +45,23 @@ horseman
   data["average rating"] = text;
 })
 .evaluate(function(){ return $('.reserve-col .btn-sm:first').prop('href').replace("https", "http")})
-.then(function(url){ 
-  secondUrl = url; 
+.click('.reserve-col .btn-sm')
+.waitForNextPage()
+.evaluate(function(){
+  var m = $('.minor');
+  var i=0;
+  var match = false;
+  for (i=0; i<m.length; i++){
+    if($(m[i]).text().match(/\+[0-9]/)){
+      match = $(m[i]).text();
+      break;
+    }
+  }
+  return match;
+})
+.then(function(match){ 
+  console.log(match);
+  data["phone number"] = match;
 })
 .then(function(){
   var result = json2csv({ data: data, fields: fields }); 
@@ -55,8 +71,6 @@ horseman
   });
 })
 .close();
-
-
 function formatCity(city){
   var x = city.split('-');
   return [x[0].camel(), x[1].camel()].join(" ");
