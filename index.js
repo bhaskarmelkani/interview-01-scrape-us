@@ -60,7 +60,6 @@ horseman
   return match;
 })
 .then(function(match){ 
-  console.log(match);
   data["phone number"] = match;
 })
 .then(function(){
