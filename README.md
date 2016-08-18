@@ -1,3 +1,6 @@
+# Step to run the code.
+* `npm install`
+* `node index.js`
 # INTRODUCTION
 This project is our first technical test for you, our future KFit engineer.
 Your job is to write a Ruby script to scrape KFit partners in Kuala Lumpur and store the result in CSV file.
